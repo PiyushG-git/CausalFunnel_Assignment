@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopEase — Demo Store | CausalFunnel Tracker Test</title>
+  <meta name="description" content="Demo e-commerce page for testing CausalFunnel user analytics tracking." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0d0f;
+      --bg2: #16161a;
+      --bg3: #1e1e24;
+      --border: rgba(255,255,255,0.08);
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --text: #f1f0f5;
+      --muted: #8b8a9a;
+      --success: #10b981;
+      --warn: #f59e0b;
+      --radius: 12px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-size: 1.4rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent2), #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--accent); color: #fff;
+      border: none; padding: 0.5rem 1.2rem;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--accent2); transform: translateY(-1px); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,58,237,0.25) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-block; background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: var(--accent2); font-size: 0.75rem; font-weight: 600;
+      padding: 0.3rem 0.8rem; border-radius: 999px; margin-bottom: 1.5rem;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent2) 0%, #ec4899 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { color: var(--muted); font-size: 1.1rem; max-width: 520px; margin: 0 auto 2.5rem; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; padding: 0.85rem 2rem;
+      border-radius: var(--radius); font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .btn-secondary {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); padding: 0.85rem 2rem;
+      border-radius: var(--radius); font-size: 1rem; font-weight: 500;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent2); background: rgba(124,58,237,0.08); }
+
+    /* ── Tracker status pill ── */
+    #tracker-status {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.5rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; font-weight: 500; color: var(--muted);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    #tracker-status .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success); animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    /* ── Products ── */
+    .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .section-title {
+      font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .section-sub { color: var(--muted); margin-bottom: 2.5rem; font-size: 0.95rem; }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+    .product-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124,58,237,0.4);
+      box-shadow: 0 8px 30px rgba(124,58,237,0.15);
+    }
+    .product-img {
+      width: 100%; height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+    .product-info { padding: 1.2rem; }
+    .product-name { font-weight: 600; margin-bottom: 0.25rem; }
+    .product-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; }
+    .product-price { font-size: 1.25rem; font-weight: 700; color: var(--accent2); }
+    .add-btn {
+      background: var(--accent); color: #fff;
+      border: none; padding: 0.5rem 1rem;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .add-btn:hover { background: var(--accent2); transform: scale(1.05); }
+
+    /* ── Banners ── */
+    .banner {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(236,72,153,0.2));
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 16px; padding: 3rem 2rem;
+      text-align: center; margin: 2rem 0;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .banner:hover { background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.3)); }
+    .banner h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .banner p { color: var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; top: 80px; right: 1.5rem; z-index: 300;
+      background: var(--bg3); border: 1px solid var(--success);
+      color: var(--success); padding: 0.75rem 1.2rem;
+      border-radius: 10px; font-size: 0.875rem; font-weight: 500;
+      transform: translateX(150%); transition: transform 0.3s ease;
+    }
+    #toast.show { transform: translateX(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <span class="nav-logo">ShopEase</span>
+    <ul class="nav-links">
+      <li><a href="#products" id="nav-products">Products</a></li>
+      <li><a href="#deals" id="nav-deals">Deals</a></li>
+      <li><a href="#about" id="nav-about">About</a></li>
+    </ul>
+    <button class="nav-cta" id="nav-signup-btn">Sign Up</button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">🎉 New Arrivals This Week</div>
+    <h1>Shop the Future<br /><span>Without the Price Tag</span></h1>
+    <p>Premium products, curated for you. Free shipping on orders over $50.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" id="hero-shop-btn">Shop Now</button>
+      <button class="btn-secondary" id="hero-learn-btn">Learn More</button>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <div class="section" id="products">
+    <h2 class="section-title">Featured Products</h2>
+    <p class="section-sub">Hand-picked top sellers</p>
+    <div class="products-grid" id="products-grid">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- Banner -->
+  <div class="section">
+    <div class="banner" id="deals" >
+      <h2>🔥 Flash Sale — Up to 60% Off</h2>
+      <p>Limited time deal on select electronics. Ends midnight tonight.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="about">
+    <p>© 2024 ShopEase. Demo page for <strong>CausalFunnel</strong> analytics tracking test.</p>
+    <p style="margin-top:0.5rem">Session ID: <code id="session-display" style="color:#a855f7;font-size:0.8rem"></code></p>
+  </footer>
+
+  <!-- Tracker Status Pill -->
+  <div id="tracker-status">
+    <div class="dot"></div>
+    <span>CausalFunnel Tracking Active</span>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">✅ Added to cart!</div>
+
+  <!-- ── Inject the CausalFunnel Tracker ── -->
+  <script src="../tracker/tracker.js" data-endpoint="http://localhost:5000/api/events"></script>
+
+  <!-- ── Demo Page Logic ── -->
+  <script>
+    const products = [
+      { id: 1, emoji: '💻', name: 'UltraBook Pro 15', desc: 'M3 chip, 16GB RAM, 512GB SSD', price: '$1,299' },
+      { id: 2, emoji: '🎧', name: 'SoundMax ANC', desc: 'Premium noise cancelling headphones', price: '$299' },
+      { id: 3, emoji: '📱', name: 'NovaMate X12', desc: '6.7" AMOLED, 200MP camera', price: '$899' },
+      { id: 4, emoji: '⌚', name: 'ChronoFit Elite', desc: 'Smartwatch with health monitoring', price: '$449' },
+      { id: 5, emoji: '🖥️', name: '4K Studio Display', desc: '32" HDR, 144Hz refresh rate', price: '$749' },
+      { id: 6, emoji: '🎮', name: 'GamePad Infinity', desc: 'Haptic feedback, 40hr battery', price: '$89' },
+      { id: 7, emoji: '📷', name: 'SnapPro Camera', desc: '61MP full-frame mirrorless', price: '$2,499' },
+      { id: 8, emoji: '🔊', name: 'BoomBox Mini', desc: 'Portable speaker, IP68 waterproof', price: '$129' },
+    ];
+
+    const grid = document.getElementById('products-grid');
+    const toast = document.getElementById('toast');
+
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.id = `product-${p.id}`;
+      card.innerHTML = `
+        <div class="product-img" style="background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08))">${p.emoji}</div>
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.desc}</div>
+          <div class="product-footer">
+            <span class="product-price">${p.price}</span>
+            <button class="add-btn" id="add-to-cart-${p.id}" data-product="${p.name}">Add to Cart</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Toast helper
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Add to cart button handler
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('add-btn')) {
+        showToast(`✅ ${e.target.dataset.product} added to cart!`);
+      }
+    });
+
+    // Display session ID in footer
+    setTimeout(() => {
+      const sid = window.CFTracker ? window.CFTracker.getSessionId() : 'loading...';
+      document.getElementById('session-display').textContent = sid;
+    }, 100);
+  </script>
+
+</body>
+</html>
