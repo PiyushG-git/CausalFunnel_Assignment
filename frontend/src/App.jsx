@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import SessionsView from './components/SessionsView.jsx';
-import HeatmapView from './components/HeatmapView.jsx';
+import SessionsView from './features/analytics/ui/SessionsView.jsx';
+import HeatmapView from './features/analytics/ui/HeatmapView.jsx';
 
 const VIEWS = [
   { id: 'sessions', label: 'Sessions', icon: '👥' },

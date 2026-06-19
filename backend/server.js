@@ -1,43 +1,20 @@
+/**
+ * server.js — Entry point
+ * ──────────────────────
+ * Single responsibility: connect to MongoDB and start the HTTP server.
+ * All Express configuration lives in app.js.
+ */
+
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
+const app = require('./app');
 
-const eventRoutes = require('./src/routes/events');
-
-const app = express();
 const PORT = process.env.PORT || 5000;
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/causalfunnel';
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: '*', // allow demo page and dashboard from any origin
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-app.use(express.json());
-
-// ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api', eventRoutes);
-
-// ─── Health Check ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// ─── 404 Handler ─────────────────────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// ─── Error Handler ────────────────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
-});
-
-// ─── Database + Start ─────────────────────────────────────────────────────────
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/causalfunnel')
+  .connect(MONGODB_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
     app.listen(PORT, () => {
@@ -48,3 +25,4 @@ mongoose
     console.error('❌ MongoDB connection failed:', err.message);
     process.exit(1);
   });
+

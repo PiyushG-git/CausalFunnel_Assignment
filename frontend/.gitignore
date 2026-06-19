@@ -1,0 +1,10 @@
+# ── Frontend specific ignores ─────────────────────────────────────
+node_modules/
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Logs
+*.log

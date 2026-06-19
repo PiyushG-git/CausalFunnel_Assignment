@@ -20,29 +20,43 @@
 
 ```
 CausalFunnel_Assignment/
+├── .gitignore                        # OS & editor patterns (global)
+│
 ├── backend/
-│   ├── server.js                   # Express entry point
-│   ├── .env                        # Environment config
+│   ├── .gitignore                    # node_modules/, .env, *.log
+│   ├── app.js                        # Express app: middleware, routes, error handlers
+│   ├── server.js                     # Entry point: DB connect → HTTP listen
+│   ├── .env                          # Environment config (git-ignored)
+│   ├── .env.example                  # Template for env vars (committed)
 │   └── src/
-│       ├── models/Event.js         # Mongoose schema
-│       ├── routes/events.js        # API routes
+│       ├── models/Event.js           # Mongoose schema
+│       ├── routes/events.js          # API route definitions
 │       └── controllers/
-│           └── eventController.js  # Business logic
+│           └── eventController.js   # Business logic & DB queries
+│
 ├── frontend/
+│   ├── .gitignore                    # node_modules/, dist/, .vite/
 │   ├── index.html
-│   ├── vite.config.js
+│   ├── vite.config.js                # Vite + proxy /api → localhost:5000
 │   └── src/
 │       ├── main.jsx
-│       ├── App.jsx                 # Root app + navigation
-│       ├── api.js                  # API client
-│       ├── index.css               # Global design system
-│       └── components/
-│           ├── SessionsView.jsx    # Sessions table + event journey
-│           └── HeatmapView.jsx     # Click heatmap (canvas)
+│       ├── App.jsx                   # Root layout + sidebar navigation
+│       ├── index.css                 # Global design system / tokens
+│       └── features/
+│           └── analytics/
+│               ├── service/
+│               │   └── api.js        # All fetch calls (analyticsApi)
+│               ├── hooks/
+│               │   ├── useSessions.js    # useSessions, useSessionEvents
+│               │   └── useHeatmap.js     # useHeatmapPages, useHeatmap
+│               └── ui/
+│                   ├── SessionsView.jsx  # Sessions table + event journey
+│                   └── HeatmapView.jsx   # Click heatmap (canvas)
+│
 ├── tracker/
-│   └── tracker.js                  # Embeddable analytics script
+│   └── tracker.js                    # Embeddable analytics script
 ├── demo/
-│   └── index.html                  # Demo e-commerce test page
+│   └── index.html                    # Demo e-commerce test page
 └── README.md
 ```
 
@@ -85,15 +99,16 @@ npm run dev
 
 ### 3. Demo Page
 
-Open `demo/index.html` directly in a browser (or serve it with a local server).
+> ⚠️ **Important:** Serve from the **project root** (not the `demo/` folder).
+> The tracker script uses a relative path `../tracker/tracker.js` which must resolve correctly.
 
 ```bash
-# From project root — using npx serve or similar
-npx serve demo -p 3000
-# Open http://localhost:3000
+# From project root:
+npx serve . -p 3000
+# Then open: http://localhost:3000/demo/index.html
 ```
 
-> **Note:** The tracker in the demo page sends events to `http://localhost:5000/api/events`. Make sure the backend is running first.
+> **Note:** The tracker sends events to `http://localhost:5000/api/events`. Start the backend first.
 
 ---
 
@@ -114,7 +129,7 @@ npx serve demo -p 3000
 {
   "session_id": "sess_abc123_xyz",
   "event_type": "click",
-  "page_url": "http://localhost:3000/",
+  "page_url": "http://localhost:3000/demo/index.html",
   "timestamp": "2024-01-01T12:00:00.000Z",
   "x": 450,
   "y": 320,
@@ -126,18 +141,36 @@ npx serve demo -p 3000
 
 ---
 
+## Data Pipeline
+
+```
+Demo Page (demo/index.html)
+  └── tracker.js          POST http://localhost:5000/api/events
+        └── backend/app.js  → routes/events.js → eventController.js → MongoDB
+
+Dashboard (localhost:5173)
+  └── features/analytics/
+        ├── service/api.js     fetch('/api/...')  [proxied by Vite]
+        ├── hooks/             useSessions / useHeatmap
+        └── ui/                SessionsView / HeatmapView
+              └── Vite proxy   /api → http://localhost:5000
+                    └── backend/app.js → routes → controller → MongoDB
+```
+
+---
+
 ## Dashboard Features
 
 ### Sessions View
 - Summary stats: total sessions, events, clicks, avg events/session
 - Table showing all sessions sorted by most recent
-- Clicking a row opens an animated **event timeline** (user journey) showing all events in chronological order
+- Clicking a row opens an animated **event timeline** (user journey)
 
 ### Heatmap View
 - Dropdown to select any tracked page URL
 - **Canvas-based heatmap** with density coloring:
   - 🔵 Blue = low density
-  - 🟠 Orange = medium density  
+  - 🟠 Orange = medium density
   - 🔴 Red = high density (hotspot)
 - Recent clicks data table with coordinates and session info
 
@@ -148,19 +181,10 @@ npx serve demo -p 3000
 Add to any webpage:
 
 ```html
-<script 
-  src="path/to/tracker.js" 
+<script
+  src="path/to/tracker.js"
   data-endpoint="http://localhost:5000/api/events">
 </script>
-```
-
-Or configure programmatically:
-
-```html
-<script>
-  window.CF_TRACKER_ENDPOINT = 'http://localhost:5000/api/events';
-</script>
-<script src="tracker.js"></script>
 ```
 
 ### What it tracks:
@@ -168,8 +192,8 @@ Or configure programmatically:
 - **`click`** — every user click with x/y coordinates + viewport size
 
 ### Session Management:
-- Session ID is stored in `localStorage` with key `cf_session_id`
-- Events are batched and sent every 2 seconds
+- Session ID stored in `localStorage` (`cf_session_id`)
+- Events batched and sent every 2 seconds in chunks of 20
 - Flush on tab close / visibility change via `keepalive` fetch
 
 ---
@@ -179,12 +203,13 @@ Or configure programmatically:
 | Decision | Rationale |
 |---|---|
 | **Event batching (2s)** | Reduces network requests; slight delay acceptable for analytics |
-| **`localStorage` for session** | Persists across page refreshes; tab-scoped. Cookies would survive clears better |
+| **`localStorage` for session** | Persists across page refreshes; tab-scoped |
 | **Canvas heatmap** | More performant than DOM-heavy alternatives for many points |
-| **No auth on API** | Simplified for assignment scope; production would add API key auth |
-| **CORS open** | Allows any origin to track; restrict to specific domains in production |
+| **No auth on API** | Simplified for assignment scope |
+| **CORS open** | Allows any origin to track; restrict in production |
 | **Relative coordinates stored** | Store `x/y` with `viewport_width/height` to normalize across screen sizes |
-| **No real-time push** | Dashboard uses manual refresh; WebSockets could be added for live updates |
+| **Features architecture** | Co-locates hooks, services, UI per domain — scales cleanly |
+| **app.js / server.js split** | `app.js` is testable without starting DB; `server.js` only boots |
 
 ---
 
@@ -196,4 +221,4 @@ Or configure programmatically:
 - [ ] Authentication + multi-tenant support
 - [ ] Time range filters on dashboard
 - [ ] Export data as CSV
-- [ ] Deployment: Docker Compose for backend + MongoDB
+- [ ] Docker Compose for backend + MongoDB

@@ -1,31 +1,18 @@
-# ── Dependencies ─────────────────────────────────────────────────
-node_modules/
+# ── Root .gitignore (global patterns only) ───────────────────────
+# Package-specific ignores live in backend/.gitignore & frontend/.gitignore
 
-# ── Environment / Secrets (NEVER commit these) ───────────────────
-.env
-.env.local
-.env.*.local
-
-# ── Build output ─────────────────────────────────────────────────
-dist/
-build/
-
-# ── Logs ─────────────────────────────────────────────────────────
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# ── OS Files ─────────────────────────────────────────────────────
+# OS Files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# ── Editor ───────────────────────────────────────────────────────
+# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ── Vite cache ───────────────────────────────────────────────────
-.vite/
+# Secrets (catch-all safety net)
+.env
+.env.local
+.env.*.local

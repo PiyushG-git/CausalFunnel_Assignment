@@ -1,0 +1,10 @@
+# ── Backend specific ignores ──────────────────────────────────────
+node_modules/
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build
+dist/
