@@ -53,15 +53,15 @@ function drawHeatmap(canvas, clicks, width, height) {
 
     if (d < 0.33) {
       // Cool — blue
-      grad.addColorStop(0, `rgba(59, 130, 246, ${0.5 + d})`);
+      grad.addColorStop(0, `rgba(59, 130, 246, ${Math.min(0.5 + d, 1)})`);
       grad.addColorStop(1, 'rgba(59, 130, 246, 0)');
     } else if (d < 0.66) {
       // Warm — orange
-      grad.addColorStop(0, `rgba(245, 158, 11, ${0.5 + d * 0.4})`);
+      grad.addColorStop(0, `rgba(245, 158, 11, ${Math.min(0.5 + d * 0.4, 1)})`);
       grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
     } else {
       // Hot — red
-      grad.addColorStop(0, `rgba(239, 68, 68, ${0.6 + d * 0.4})`);
+      grad.addColorStop(0, `rgba(239, 68, 68, ${Math.min(0.6 + d * 0.4, 1)})`);
       grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
     }
 

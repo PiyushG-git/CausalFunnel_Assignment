@@ -62,18 +62,25 @@
     const eventsToSend = [...eventQueue];
     eventQueue = [];
 
-    try {
-      await fetch(ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventsToSend),
-        // Use keepalive so events are sent even on page unload
-        keepalive: true,
-      });
-    } catch (err) {
-      // On failure, push events back to queue for retry
-      console.warn('[CF Tracker] Failed to send events, will retry:', err.message);
-      eventQueue = [...eventsToSend, ...eventQueue];
+    // The Fetch keepalive option has a 64KB body limit.
+    // Chunk into batches of 20 events to stay safely within that limit.
+    const CHUNK_SIZE = 20;
+    for (let i = 0; i < eventsToSend.length; i += CHUNK_SIZE) {
+      const chunk = eventsToSend.slice(i, i + CHUNK_SIZE);
+      try {
+        await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(chunk),
+          keepalive: true,
+        });
+      } catch (err) {
+        // On network failure push the failed chunk back for a future retry,
+        // but don't retry keepalive batches to avoid infinite growth.
+        console.warn('[CF Tracker] Failed to send events:', err.message);
+        eventQueue = [...chunk, ...eventQueue];
+        break; // stop sending further chunks this cycle
+      }
     }
   }
 

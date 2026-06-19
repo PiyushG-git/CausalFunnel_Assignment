@@ -56,7 +56,7 @@ export default function App() {
               Live
             </div>
             <a
-              href="http://localhost:5173/../demo/index.html"
+              href="http://localhost:3000"
               target="_blank"
               rel="noreferrer"
               style={{

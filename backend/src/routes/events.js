@@ -23,10 +23,11 @@ router.get('/sessions/:session_id/events', getSessionEvents);
 
 // ─── Heatmap Routes ───────────────────────────────────────────────────────────
 
+// GET /api/heatmap/pages — List all pages with click data
+// ⚠️  Must be registered BEFORE /heatmap to avoid route shadowing
+router.get('/heatmap/pages', getHeatmapPages);
+
 // GET /api/heatmap?page_url=<url> — Click data for a specific page
 router.get('/heatmap', getHeatmapData);
-
-// GET /api/heatmap/pages — List all pages with click data
-router.get('/heatmap/pages', getHeatmapPages);
 
 module.exports = router;

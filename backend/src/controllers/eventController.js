@@ -27,7 +27,7 @@ const createEvents = async (req, res) => {
       }
     }
 
-    const savedEvents = await Event.insertMany(eventsArray);
+    const savedEvents = await Event.insertMany(eventsArray, { ordered: false });
     return res.status(201).json({
       message: `${savedEvents.length} event(s) stored successfully`,
       count: savedEvents.length,
@@ -94,11 +94,12 @@ const getSessionEvents = async (req, res) => {
 
     const events = await Event.find({ session_id })
       .sort({ timestamp: 1 }) // chronological order = user journey
-      .select('-__v')
       .lean();
 
+    // Return 200 with empty array for a valid session that has no events yet.
+    // Reserve 404 only for truly unknown/malformed session IDs if needed.
     if (events.length === 0) {
-      return res.status(404).json({ error: 'No events found for this session' });
+      return res.status(200).json({ session_id, events: [], total: 0 });
     }
 
     return res.json({ session_id, events, total: events.length });

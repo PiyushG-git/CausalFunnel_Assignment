@@ -276,7 +276,8 @@ body {
 .heatmap-canvas-wrap {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius-lg); overflow: hidden;
-  position: relative; min-height: 400px;
+  position: relative; /* BUG-09: required for absolute loading overlay child */
+  min-height: 400px;
 }
 .heatmap-canvas-wrap canvas {
   display: block; width: 100%; height: auto;

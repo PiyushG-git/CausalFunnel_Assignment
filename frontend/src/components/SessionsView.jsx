@@ -3,11 +3,14 @@ import { api } from '../api.js';
 
 function formatDuration(first, last) {
   const diff = new Date(last) - new Date(first);
-  const secs = Math.floor(diff / 1000);
-  if (secs < 60) return `${secs}s`;
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m ${secs % 60}s`;
-  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+  const totalSecs = Math.floor(diff / 1000);
+  if (totalSecs < 60) return `${totalSecs}s`;
+  const mins = Math.floor(totalSecs / 60);
+  const remainingSecs = totalSecs - mins * 60;  // BUG-05: was `secs % 60` using wrong var
+  if (mins < 60) return `${mins}m ${remainingSecs}s`;
+  const hours = Math.floor(mins / 60);
+  const remainingMins = mins % 60;
+  return `${hours}h ${remainingMins}m`;
 }
 
 function formatTime(ts) {
