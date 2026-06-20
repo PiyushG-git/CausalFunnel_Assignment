@@ -78,7 +78,9 @@
         // On network failure push the failed chunk back for a future retry,
         // but don't retry keepalive batches to avoid infinite growth.
         console.warn('[CF Tracker] Failed to send events:', err.message);
+        // Restore failed events and schedule a retry on the next interval
         eventQueue = [...chunk, ...eventQueue];
+        scheduleFlush(); // ensure retry happens — without this, events sat silently
         break; // stop sending further chunks this cycle
       }
     }

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const eventRoutes = require('./src/routes/events');
 
@@ -19,6 +20,16 @@ app.use(
   })
 );
 app.use(express.json());
+
+// ─── Serve Tracker Script ─────────────────────────────────────────────────────
+// Serves tracker/tracker.js at GET /tracker.js
+// This lets the demo page (and any 3rd-party page) load the script from the
+// same origin as event collection: http://localhost:5000/tracker.js
+app.get('/tracker.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.resolve(__dirname, '../tracker/tracker.js'));
+});
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api', eventRoutes);

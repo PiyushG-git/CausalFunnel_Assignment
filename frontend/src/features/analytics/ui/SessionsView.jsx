@@ -77,8 +77,10 @@ function EventTimeline({ sessionId }) {
         <div className="timeline">
           {events.map((evt, i) => {
             const isPageView = evt.event_type === 'page_view';
-            const title = isPageView ? 'Page View' : `Click: "${evt.x}, ${evt.y}"`; // using coords as proxy for what they clicked
-            const sub = isPageView ? new URL(evt.page_url).pathname : 'btn_interaction';
+            const title = isPageView ? 'Page View' : `Click: (${evt.x}, ${evt.y})`;
+            // Safely parse the URL — malformed URLs from DB must not crash the render
+            let sub = evt.page_url;
+            try { sub = new URL(evt.page_url).pathname; } catch (_) { /* keep raw url */ }
 
             return (
               <div key={evt._id || i} className="timeline-item">

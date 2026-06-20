@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 const {
   createEvents,
   getSessions,
@@ -10,24 +11,24 @@ const {
 
 // ─── Event Routes ─────────────────────────────────────────────────────────────
 
-// POST /api/events — Ingest one or more tracked events
+// POST /api/events — Public endpoint (tracker doesn't need an API key)
+// Same pattern as Google Analytics / Mixpanel collection endpoints
 router.post('/events', createEvents);
 
-// ─── Session Routes ───────────────────────────────────────────────────────────
+// ─── Session Routes (protected) ───────────────────────────────────────────────
 
-// GET /api/sessions — List all sessions with event count summary
-router.get('/sessions', getSessions);
+// GET /api/sessions — Requires x-api-key (or open if API_KEY not set in .env)
+router.get('/sessions', auth, getSessions);
 
-// GET /api/sessions/:session_id/events — Full event journey for a session
-router.get('/sessions/:session_id/events', getSessionEvents);
+// GET /api/sessions/:session_id/events — Requires x-api-key
+router.get('/sessions/:session_id/events', auth, getSessionEvents);
 
-// ─── Heatmap Routes ───────────────────────────────────────────────────────────
+// ─── Heatmap Routes (protected) ───────────────────────────────────────────────
 
-// GET /api/heatmap/pages — List all pages with click data
-// ⚠️  Must be registered BEFORE /heatmap to avoid route shadowing
-router.get('/heatmap/pages', getHeatmapPages);
+// GET /api/heatmap/pages — Must be BEFORE /heatmap to avoid route shadowing
+router.get('/heatmap/pages', auth, getHeatmapPages);
 
-// GET /api/heatmap?page_url=<url> — Click data for a specific page
-router.get('/heatmap', getHeatmapData);
+// GET /api/heatmap?page_url=<url>
+router.get('/heatmap', auth, getHeatmapData);
 
 module.exports = router;

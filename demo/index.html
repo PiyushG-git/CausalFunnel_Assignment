@@ -244,8 +244,9 @@
   <!-- Toast -->
   <div id="toast">✅ Added to cart!</div>
 
-  <!-- ── Inject the CausalFunnel Tracker ── -->
-  <script src="../tracker/tracker.js" data-endpoint="http://localhost:5000/api/events"></script>
+  <!-- ── CausalFunnel Tracker ── -->
+  <!-- Loaded directly from the backend — works regardless of how this file is served -->
+  <script src="http://localhost:5000/tracker.js" data-endpoint="http://localhost:5000/api/events"></script>
 
   <!-- ── Demo Page Logic ── -->
   <script>
