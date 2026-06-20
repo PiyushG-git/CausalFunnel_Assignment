@@ -110,6 +110,49 @@ npx serve . -p 3000
 
 > **Note:** The tracker sends events to `http://localhost:5000/api/events`. Start the backend first.
 
+> **Note:** The tracker sends events to `http://localhost:5000/api/events`. Start the backend first.
+
+---
+
+## Deployment Guide (Free Tier)
+
+This application is ready to be deployed to production using free tier services.
+
+### 1. Database (MongoDB Atlas)
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and create a free M0 cluster.
+2. In Network Access, whitelist `0.0.0.0/0` (Allow access from anywhere).
+3. In Database Access, create a database user and password.
+4. Click **Connect** → **Connect your application** and copy the `MONGODB_URI` connection string.
+
+### 2. Backend (Render)
+1. Push this repository to GitHub.
+2. Go to [Render](https://render.com/) and create a new **Web Service**.
+3. Connect your GitHub repo and select the `backend` directory (using the "Root Directory" setting).
+4. Set the Build Command to `npm install` and Start Command to `npm start`.
+5. Add Environment Variables:
+   - `MONGODB_URI` = *(your Atlas connection string)*
+   - `API_KEY` = *(create a secure random string, e.g., `super_secret_key_123`)*
+6. Deploy! Once live, copy your backend URL (e.g., `https://causalfunnel-backend.onrender.com`).
+   *Note: In your Render environment variables, later set `FRONTEND_URL` to your Vercel URL to restrict CORS for the dashboard.*
+
+### 3. Frontend Dashboard (Vercel)
+1. Go to [Vercel](https://vercel.com/) and import your GitHub repository.
+2. Edit the **Root Directory** to be `frontend`.
+3. Add Environment Variables:
+   - `VITE_API_URL` = `https://causalfunnel-backend.onrender.com/api` *(replace with your Render URL)*
+   - `VITE_API_KEY` = *(the same API_KEY you set in Render)*
+4. Deploy! Your dashboard is now live.
+
+### 4. Demo Page Integration
+To track data on any live website (like the demo page), update the script tag in your HTML to point to your deployed backend URL:
+
+```html
+<script 
+  src="https://causalfunnel-backend.onrender.com/tracker.js" 
+  data-endpoint="https://causalfunnel-backend.onrender.com/api/events">
+</script>
+```
+
 ---
 
 ## API Endpoints
@@ -205,8 +248,9 @@ Add to any webpage:
 | **Event batching (2s)** | Reduces network requests; slight delay acceptable for analytics |
 | **`localStorage` for session** | Persists across page refreshes; tab-scoped |
 | **Canvas heatmap** | More performant than DOM-heavy alternatives for many points |
-| **No auth on API** | Simplified for assignment scope |
-| **CORS open** | Allows any origin to track; restrict in production |
+| **No auth on POST /events** | Simplified for assignment scope, functions like a public tracking pixel |
+| **Optional API Key** | Dashboard read endpoints are protected by `x-api-key` if `API_KEY` is set in env |
+| **CORS open for tracker** | Allows any origin to track; dashboard API is restricted to frontend origins |
 | **Relative coordinates stored** | Store `x/y` with `viewport_width/height` to normalize across screen sizes |
 | **Features architecture** | Co-locates hooks, services, UI per domain — scales cleanly |
 | **app.js / server.js split** | `app.js` is testable without starting DB; `server.js` only boots |
