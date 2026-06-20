@@ -56,6 +56,8 @@ const getSessions = async (req, res) => {
           first_seen: { $min: '$timestamp' },
           last_seen: { $max: '$timestamp' },
           pages_visited: { $addToSet: '$page_url' },
+          timezone: { $first: '$timezone' },
+          referrer: { $first: '$referrer' },
         },
       },
       {
@@ -70,6 +72,8 @@ const getSessions = async (req, res) => {
           first_seen: 1,
           last_seen: 1,
           pages_visited: { $size: '$pages_visited' },
+          timezone: 1,
+          referrer: 1,
           _id: 0,
         },
       },
@@ -93,7 +97,7 @@ const getSessionEvents = async (req, res) => {
     }
 
     const events = await Event.find({ session_id })
-      .sort({ timestamp: 1 }) // chronological order = user journey
+      .sort({ timestamp: -1 }) // newest events first (descending)
       .lean();
 
     // Return 200 with empty array for a valid session that has no events yet.

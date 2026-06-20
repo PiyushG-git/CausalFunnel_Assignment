@@ -6,17 +6,26 @@ const eventRoutes = require('./src/routes/events');
 
 const app = express();
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
-// Allow all localhost ports for dev; restrict to FRONTEND_URL in production
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000']
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// Dashboard read endpoints: restrict to known frontend origins
+const dashboardOrigins = process.env.FRONTEND_URL
+  ? [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://127.0.0.1:3000']
   : '*';
 
 app.use(
-  cors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  cors(function (req, callback) {
+    // The tracker runs on ANY webpage (including file:// demo pages),
+    // exactly like GA / Mixpanel pixels. Open CORS for events collection.
+    if (req.path === '/api/events') {
+      callback(null, { origin: true, methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type'] });
+    } else {
+      // Protect dashboard routes
+      callback(null, {
+        origin: dashboardOrigins,
+        methods: ['GET', 'POST', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+      });
+    }
   })
 );
 app.use(express.json());

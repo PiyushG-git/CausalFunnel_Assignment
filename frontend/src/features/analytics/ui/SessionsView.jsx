@@ -34,7 +34,7 @@ function SessionRow({ session, isSelected, onClick }) {
         <div className="session-events-badge">{session.total_events} Events</div>
       </div>
       <div className="session-meta">
-        Direct • {time} • United Kingdom
+        {session.referrer ? 'Referral' : 'Direct'} • {time} • {session.timezone ? session.timezone.split('/')[1]?.replace('_', ' ') || session.timezone : 'Unknown'}
       </div>
     </div>
   );
@@ -101,7 +101,7 @@ function EventTimeline({ sessionId }) {
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function SessionsView() {
-  const { sessions, loading, error } = useSessions();
+  const { sessions, loading, error, refetch } = useSessions();
   const [selectedSession, setSelectedSession] = useState(null);
 
   const totalEvents = sessions.reduce((a, s) => a + s.total_events, 0);
@@ -149,7 +149,20 @@ export default function SessionsView() {
         <div className="split-view">
           {/* Left Column: Recent Sessions */}
           <div>
-            <h2 className="section-heading">Recent Sessions</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+              <h2 className="section-heading" style={{ marginBottom: 0 }}>Recent Sessions</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  ● LIVE · 30s
+                </span>
+                <button
+                  onClick={refetch}
+                  style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)', background: 'none', border: '1px solid var(--border-strong)', padding: '0.25rem 0.75rem', cursor: 'pointer', letterSpacing: '0.05em', textTransform: 'uppercase' }}
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
             <div className="session-list">
               {sessions.slice(0, 15).map((s) => (
                 <SessionRow

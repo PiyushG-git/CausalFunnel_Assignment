@@ -45,6 +45,14 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    timezone: {
+      type: String,
+      default: '',
+    },
+    referrer: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: false, // we manage our own timestamp field
@@ -54,8 +62,8 @@ const eventSchema = new mongoose.Schema(
 
 // Compound index for heatmap queries
 eventSchema.index({ page_url: 1, event_type: 1 });
-// Index for session timeline queries
-eventSchema.index({ session_id: 1, timestamp: 1 });
+// Index for session timeline queries (descending time)
+eventSchema.index({ session_id: 1, timestamp: -1 });
 
 const Event = mongoose.model('Event', eventSchema);
 

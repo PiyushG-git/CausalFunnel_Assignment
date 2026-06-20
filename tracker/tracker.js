@@ -100,6 +100,8 @@
       page_url: window.location.href,
       timestamp: new Date().toISOString(),
       user_agent: navigator.userAgent,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+      referrer: document.referrer || '',
     };
   }
 

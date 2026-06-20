@@ -1,6 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/auth');
+const express  = require('express');
+const router   = express.Router();
+const auth     = require('../middleware/auth');
 const {
   createEvents,
   getSessions,
@@ -10,10 +10,8 @@ const {
 } = require('../controllers/eventController');
 
 // ─── Event Routes ─────────────────────────────────────────────────────────────
-
-// POST /api/events — Public endpoint (tracker doesn't need an API key)
-// Same pattern as Google Analytics / Mixpanel collection endpoints
 router.post('/events', createEvents);
+
 
 // ─── Session Routes (protected) ───────────────────────────────────────────────
 

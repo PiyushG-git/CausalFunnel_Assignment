@@ -10,6 +10,7 @@ import { analyticsApi } from '../service/api';
 
 /**
  * Hook to fetch and manage all sessions.
+ * Auto-refreshes every 30 seconds so the dashboard stays live.
  * @returns {{ sessions, loading, error, refetch }}
  */
 export function useSessions() {
@@ -27,12 +28,20 @@ export function useSessions() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Initial fetch
   useEffect(() => {
     refetch();
   }, [refetch]);
 
+  // Auto-refresh every 30 seconds — keeps dashboard live as demo generates events
+  useEffect(() => {
+    const timer = setInterval(refetch, 30_000);
+    return () => clearInterval(timer);
+  }, [refetch]);
+
   return { sessions, loading, error, refetch };
 }
+
 
 /**
  * Hook to fetch all events for a single session (event journey).
