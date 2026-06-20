@@ -8,20 +8,32 @@ const app = express();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 // Dashboard read endpoints: restrict to known frontend origins
-const dashboardOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://127.0.0.1:3000']
-  : '*';
+// Clean up FRONTEND_URL to remove any accidental trailing slashes from environment variables
+const rawFrontendUrl = process.env.FRONTEND_URL || '';
+const cleanFrontendUrl = rawFrontendUrl.replace(/\/$/, '');
+
+const defaultOrigins = [
+  cleanFrontendUrl,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+].filter(Boolean);
 
 app.use(
   cors(function (req, callback) {
-    // The tracker runs on ANY webpage (including file:// demo pages),
-    // exactly like GA / Mixpanel pixels. Open CORS for events collection.
     if (req.path === '/api/events') {
       callback(null, { origin: true, methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type'] });
     } else {
-      // Protect dashboard routes
+      // For dashboard endpoints, allow if origin matches our list OR if it's a vercel app (for easy deployment testing)
+      const reqOrigin = req.headers.origin;
+      const isAllowed = !reqOrigin || 
+                        defaultOrigins.includes(reqOrigin) || 
+                        reqOrigin.endsWith('.vercel.app') || 
+                        !process.env.FRONTEND_URL;
+                        
       callback(null, {
-        origin: dashboardOrigins,
+        origin: isAllowed ? reqOrigin || '*' : defaultOrigins[0],
         methods: ['GET', 'POST', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
       });
