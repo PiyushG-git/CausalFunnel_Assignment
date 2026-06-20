@@ -55,7 +55,18 @@ app.get('/tracker.js', (req, res) => {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api', eventRoutes);
 
-// ─── Health Check ─────────────────────────────────────────────────────────────
+// ─── Health & Root ────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({
+    name: 'CausalFunnel Analytics API',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      tracker: '/tracker.js'
+    }
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
